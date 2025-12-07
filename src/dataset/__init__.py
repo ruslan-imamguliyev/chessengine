@@ -1,9 +1,11 @@
+import os
 import shutil
 import kagglehub
 import zipfile
 import logging
 from abc import ABC, abstractmethod
 from pathlib import Path
+from src.config import ConfigurationManager, DataIngestionConfig
 
 
 class DatasetIngestor(ABC):
@@ -13,14 +15,16 @@ class DatasetIngestor(ABC):
 
 
 class KaggleDatasetIngestor(DatasetIngestor):
-    def __init__(self):
-        self.logger = logging.getLogger(__name__)
+    def __init__(
+            self,
+            config: DataIngestionConfig
+            ):
+        self.config = config
 
     def ingest(self) -> None:
-        path_str = kagglehub.dataset_download("ronakbadhe/chess-evaluations")
+        path_str = kagglehub.dataset_download(self.config.source)
         downloaded = Path(path_str)
-        current_path = Path(__file__).resolve().parent
-
+        current_path = Path(os.getcwd()) / Path(self.config.install_path)
         if not downloaded.exists():
             raise FileNotFoundError(f"Downloaded path does not exist: {downloaded}")
 
@@ -30,8 +34,9 @@ class KaggleDatasetIngestor(DatasetIngestor):
                     zf.extractall(current_path)
                 try:
                     downloaded.unlink()
-                except Exception:
-                    self.logger.debug("Could not remove downloaded zip", exc_info=True)
+                except Exception as e:
+                    raise e
+                    #self.logger.debug("Could not remove downloaded zip", exc_info=True)
 
             elif downloaded.is_dir():
                 for item in downloaded.iterdir():
@@ -44,20 +49,26 @@ class KaggleDatasetIngestor(DatasetIngestor):
                     shutil.move(str(item), str(current_path))
                 try:
                     downloaded.rmdir()
-                except OSError:
-                    self.logger.debug("Could not remove download directory (not empty)", exc_info=True)
+                except OSError as e:
+                    raise e
+                    #self.logger.debug("Could not remove download directory (not empty)", exc_info=True)
 
             else:
                 raise RuntimeError(f"Unsupported downloaded artifact: {downloaded}")
 
-        except Exception:
-            self.logger.exception("Failed to ingest dataset")
-            raise
+        except Exception as e:
+            #self.logger.exception("Failed to ingest dataset")
+            raise e
 
 
 class DataIngestionManager:
-    def __init__(self, config):
-        pass
+    def __init__(
+            self,
+            config: ConfigurationManager
+        ):
+        self.config = config.get_data_ingestion_config()
     
-    def get_data_ingestor() -> DatasetIngestor:
-        pass
+    def get_data_ingestor(self) -> DatasetIngestor:
+        match self.config.type:
+            case "kagglehub":
+                return KaggleDatasetIngestor(self.config)
