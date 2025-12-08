@@ -1,8 +1,10 @@
 import os
+from requests.exceptions import ConnectionError
+from time import sleep
 import shutil
 import kagglehub
 import zipfile
-import logging
+from src.logging import logger
 from abc import ABC, abstractmethod
 from pathlib import Path
 from src.config import ConfigurationManager, DataIngestionConfig
@@ -22,11 +24,19 @@ class KaggleDatasetIngestor(DatasetIngestor):
         self.config = config
 
     def ingest(self) -> None:
-        path_str = kagglehub.dataset_download(self.config.source)
+        try:
+            path_str = kagglehub.dataset_download(self.config.source)
+        except ConnectionError as e:
+            logger.exception(e)
+            logger.info("Trying to request the download one more time in 3 seconds.")
+            sleep(3)
+            self.ingest()
+            return
         downloaded = Path(path_str)
         current_path = Path(os.getcwd()) / Path(self.config.install_path)
         if not downloaded.exists():
-            raise FileNotFoundError(f"Downloaded path does not exist: {downloaded}")
+            logger.exception(FileNotFoundError(f"Downloaded path does not exist: {downloaded}"))
+            raise
 
         try:
             if downloaded.is_file() and downloaded.suffix == ".zip":
@@ -35,8 +45,8 @@ class KaggleDatasetIngestor(DatasetIngestor):
                 try:
                     downloaded.unlink()
                 except Exception as e:
+                    logger.error("Could not remove downloaded zip.")
                     raise e
-                    #self.logger.debug("Could not remove downloaded zip", exc_info=True)
 
             elif downloaded.is_dir():
                 for item in downloaded.iterdir():
@@ -50,15 +60,18 @@ class KaggleDatasetIngestor(DatasetIngestor):
                 try:
                     downloaded.rmdir()
                 except OSError as e:
+                    logger.error("Could not remove download directory (not empty)", exc_info=True)
                     raise e
-                    #self.logger.debug("Could not remove download directory (not empty)", exc_info=True)
 
             else:
-                raise RuntimeError(f"Unsupported downloaded artifact: {downloaded}")
+                logger.exception(RuntimeError(f"Unsupported downloaded artifact: {downloaded}"))
+                raise
 
         except Exception as e:
-            #self.logger.exception("Failed to ingest dataset")
+            logger.exception("Failed to ingest dataset")
             raise e
+        
+        logger.info("Succesfully downloaded the dataset.")
 
 
 class DataIngestionManager:
