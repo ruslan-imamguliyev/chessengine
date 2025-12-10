@@ -1,12 +1,9 @@
-from src.config import ConfigurationManager
-from src.dataset import DataIngestionManager
+from src.config.manager import ConfigurationManager
+from src.dataset.ingestion import DataIngestionManager
 
-config = ConfigurationManager(
-    'src/config/config.yaml'
-)
-dim = DataIngestionManager(
-    config=config
-)
+config = ConfigurationManager()
 
+dim = DataIngestionManager(config=config)
 data_ingestor = dim.get_data_ingestor()
+
 data_ingestor.ingest()

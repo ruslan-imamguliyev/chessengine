@@ -1,4 +1,6 @@
 data_ingestion:
-  ingestion_type: kagglehub
-  source: ronakbadhe/chess-evaluations
-  install_path: src\dataset\
+  method: kagglehub
+  available_methods:
+    kagglehub:
+      source: ronakbadhe/chess-evaluations
+      install_path: dataset/

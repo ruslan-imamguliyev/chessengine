@@ -1,9 +1,12 @@
 from yaml import safe_load
-from box import ConfigBox
+from pathlib import Path
+from typing import Union
 from box.exceptions import BoxValueError
 from src.logging import logger
 
-def read_yaml(path_to_yaml: str) -> ConfigBox:
+def read_yaml(
+        path_to_yaml: Union[str, Path]
+    ) -> dict:
     """reads yaml file and returns
 
     Args:
@@ -19,7 +22,7 @@ def read_yaml(path_to_yaml: str) -> ConfigBox:
     try:
         with open(path_to_yaml) as yaml_file:
             content = safe_load(yaml_file)
-            return ConfigBox(content)
+            return content
     except BoxValueError as be:
         logger.exception(be)
         raise ValueError("yaml file is empty")
