@@ -25,7 +25,8 @@ dev = [
     "kagglehub (>=0.3.13,<0.4.0)"
 ]
 research = [
-    "notebook (>=7.5.0,<8.0.0)"
+    "notebook (>=7.5.0,<8.0.0)",
+    "matplotlib (>=3.10.8,<4.0.0)"
 ]
 
 [tool.poetry.group.research]
