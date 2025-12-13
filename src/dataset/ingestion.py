@@ -12,6 +12,49 @@ from src.config.manager import ConfigurationManager
 
 
 class DatasetIngestor(ABC):
+    @staticmethod
+    def install_dataset(
+        downloaded: Path,
+        current_path: Path
+    ) -> None:
+        """
+        Installs a dataset depending on its instance (zip, directory).
+        
+        :param downloaded: Path to the downloaded object.
+        :type downloaded: Path
+        :param current_path: Path where to install the dataset.
+        :type current_path: Path
+        :rtype None
+        """
+        
+        if downloaded.is_file() and downloaded.suffix == ".zip":
+            with zipfile.ZipFile(downloaded, "r") as zf:
+                zf.extractall(current_path)
+            try:
+                downloaded.unlink()
+            except Exception as e:
+                logger.error("Could not remove downloaded zip.")
+                raise e
+
+        elif downloaded.is_dir():
+            for item in downloaded.iterdir():
+                dest = current_path / item.name
+                if dest.exists():
+                    if dest.is_dir():
+                        shutil.rmtree(dest)
+                    else:
+                        dest.unlink()
+                shutil.move(str(item), str(current_path))
+            try:
+                downloaded.rmdir()
+            except OSError as e:
+                logger.error("Could not remove download directory (not empty)", exc_info=True)
+                raise e
+
+        else:
+            logger.exception(RuntimeError(f"Unsupported downloaded artifact: {downloaded}"))
+            raise
+
     @abstractmethod
     def ingest(self) -> None:
         pass
@@ -28,7 +71,7 @@ class KaggleDatasetIngestor(DatasetIngestor):
         current_path = Path(os.getcwd()) / Path(self.config.install_path)
         if not os.path.exists(current_path):
             logger.info("Making directory for the dataset: " + str(current_path))
-            os.mkdir(current_path)
+            os.makedirs(current_path)
         
         logger.info("Downloading the dataset to this path: " + str(current_path))
         
@@ -48,33 +91,10 @@ class KaggleDatasetIngestor(DatasetIngestor):
             raise
 
         try:
-            if downloaded.is_file() and downloaded.suffix == ".zip":
-                with zipfile.ZipFile(downloaded, "r") as zf:
-                    zf.extractall(current_path)
-                try:
-                    downloaded.unlink()
-                except Exception as e:
-                    logger.error("Could not remove downloaded zip.")
-                    raise e
-
-            elif downloaded.is_dir():
-                for item in downloaded.iterdir():
-                    dest = current_path / item.name
-                    if dest.exists():
-                        if dest.is_dir():
-                            shutil.rmtree(dest)
-                        else:
-                            dest.unlink()
-                    shutil.move(str(item), str(current_path))
-                try:
-                    downloaded.rmdir()
-                except OSError as e:
-                    logger.error("Could not remove download directory (not empty)", exc_info=True)
-                    raise e
-
-            else:
-                logger.exception(RuntimeError(f"Unsupported downloaded artifact: {downloaded}"))
-                raise
+            self.install_dataset(
+                downloaded=downloaded,
+                current_path=current_path
+            )
 
         except Exception as e:
             logger.exception("Failed to ingest dataset")
