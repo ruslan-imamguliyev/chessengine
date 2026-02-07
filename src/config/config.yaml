@@ -4,3 +4,8 @@ data_ingestion:
     kagglehub:
       source: ronakbadhe/chess-evaluations
       install_path: dataset/raw/
+
+data_transformation:
+  output_dir: dataset/processed
+  shard_size: 100000
+  input_file: dataset/raw/chess_data.csv

@@ -3,6 +3,9 @@ __pycache__/
 *.py[codz]
 *$py.class
 
+# PyTorch tensors
+*.pt
+
 # CSV datasets
 *.csv
 
