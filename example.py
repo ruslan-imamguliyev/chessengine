@@ -1,6 +1,7 @@
 from src.config.manager import ConfigurationManager
 from src.data.ingestion import DataIngestionManager
 from src.data.transformation import DataTransformator
+from src.data.preprocessing import DataPreprocessor
 
 config = ConfigurationManager()
 
@@ -9,5 +10,5 @@ config = ConfigurationManager()
 
 # data_ingestor.ingest()
 
-transformator = DataTransformator(config=config)
-transformator.transform()
+data_preprocessor = DataPreprocessor(config=config)
+data_preprocessor.preprocess()

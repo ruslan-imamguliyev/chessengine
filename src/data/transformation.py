@@ -12,16 +12,9 @@ class DataTransformator:
     def __init__(self, config: ConfigurationManager):
         self.config = config.get_data_transformation_config()
 
-    def __preprocess(self, df: pd.DataFrame) -> pd.DataFrame:
-        logger.info("Preprocessing: " + self.config.input_file)
-        df = df[~df["Evaluation"].str.contains("#")]
-        df["Evaluation"] = df["Evaluation"].astype(int)
-        return df
-    
 
     def transform(self) -> None:
         df = pd.read_csv(self.config.input_file)
-        df = self.__preprocess(df)
 
         self.save_dataset_shards(
             fens=df.FEN.to_list(),

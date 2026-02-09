@@ -5,6 +5,15 @@ data_ingestion:
       source: ronakbadhe/chess-evaluations
       install_path: dataset/raw/
 
+data_preprocessing:
+  input_path: dataset/raw/
+  output_path: dataset/preprocessed/
+  output_file: preprocessed.csv
+  max_mate_value: 30000
+  min_mate_value: 1000
+  scaling_factor: 500
+
+
 data_transformation:
   output_dir: dataset/processed
   shard_size: 100000
