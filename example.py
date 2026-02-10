@@ -1,14 +1,9 @@
 from src.config.manager import ConfigurationManager
-from src.data.ingestion import DataIngestionManager
-from src.data.transformation import DataTransformator
-from src.data.preprocessing import DataPreprocessor
-
+from src.logging import logger
+from src.data.entity import DatasetEntity
+import torch
+torch.set_printoptions(threshold=10_000)
 config = ConfigurationManager()
 
-# dim = DataIngestionManager(config=config)
-# data_ingestor = dim.get_data_ingestor()
-
-# data_ingestor.ingest()
-
-data_preprocessor = DataPreprocessor(config=config)
-data_preprocessor.preprocess()
+# DataTransformator(config=config).transform()
+logger.info(DatasetEntity(config=config).get_data_set()[0])

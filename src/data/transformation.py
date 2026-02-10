@@ -1,6 +1,5 @@
-import torch
-from typing import List
-from src.utils import batch_fen_to_tensor
+import numpy as np
+from src.utils import fen_to_tensor
 from src.logging import logger
 from math import ceil
 import os
@@ -14,39 +13,67 @@ class DataTransformator:
 
 
     def transform(self) -> None:
+
+        if not os.path.exists(self.config.output_path):
+            logger.info("Making directory for the transformed dataset: " + self.config.output_path)
+            try:
+                os.makedirs(self.config.output_path)
+            except Exception as e:
+                logger.exception("Failed to create directory for the transformed dataset.")
+                raise e
+        
+        logger.info("Reading the full dataset.")
         df = pd.read_csv(self.config.input_file)
 
-        self.save_dataset_shards(
-            fens=df.FEN.to_list(),
-            evals=df.Evaluation.to_list()
-        )
 
+        num_samples = len(df)
 
-    def save_dataset_shards(
-            self,
-            fens: List[str],
-            evals: List[int]
-        ) -> None:
+        logger.info("Initializing memory-mapped files for features and targets.")
 
-        output_dir = self.config.output_dir
-
-        if not os.path.exists(output_dir):
-            logger.info("Making directory for the transformed dataset: " + str(output_dir))
-            os.makedirs(output_dir)
-
-        shard_size = self.config.shard_size
-        num_shards = ceil(len(fens) / shard_size)
-
-        for i in range(num_shards):
-            start = i * shard_size
-            end = min((i + 1) * shard_size, len(fens))
-
-            x = batch_fen_to_tensor(fens[start:end])
-            y = torch.tensor(evals[start:end], dtype=torch.float32).unsqueeze(1)
-
-            torch.save(
-                {"x": x, "y": y},
-                f"{output_dir}/shard_{i:04d}.pt"
+        try:
+            feature_filepath = os.path.join(
+                self.config.output_path,
+                self.config.feature_filename
+            )
+            target_filepath = os.path.join(
+                self.config.output_path,
+                self.config.target_filename
             )
 
-            logger.info(f"Saved shard {i}/{num_shards}")
+            X = np.memmap(
+                f"{feature_filepath}_x.bin",
+                dtype='uint8', mode='w+',
+                shape=(num_samples, 18, 8)
+            )
+
+            Y = np.memmap(
+                f"{target_filepath}_y.bin",
+                dtype='float32',
+                mode='w+',
+                shape=(num_samples,)
+            )
+        except Exception as e:
+            logger.exception("Failed to initialize memory-mapped files.")
+            raise e
+        
+        logger.info("Processing dataset in chunks and writing to memory-mapped files.")
+        
+        fen_list = df['FEN'].to_list()
+        eval_list = df['Evaluation'].to_list()
+
+        for i, (fen, evaluation) in enumerate(zip(fen_list, eval_list)):
+            tensor_bool = fen_to_tensor(fen)
+
+            X[i] = np.packbits(tensor_bool, axis=-1).reshape(18, 8)
+            
+            # 3. Store normalized evaluation
+            Y[i] = evaluation
+            
+            if i % 100000 == 0:
+                X.flush() # Periodically write to disk to keep RAM clear
+                print(f"Processed {i} positions...")
+        
+        del X, Y
+
+        logger.info("Successfully transformed the dataset and saved to memory-mapped files.")
+

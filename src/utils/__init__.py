@@ -2,59 +2,58 @@ from yaml import safe_load
 from pathlib import Path
 from typing import Union, List
 from box.exceptions import BoxValueError
-import torch
+import numpy as np
 
-def batch_fen_to_tensor(
-        fens: List[str]
-    ) -> torch.Tensor:
+
+def fen_to_tensor(
+        fen: str
+    ) -> np.array:
 
     """
-    Convert a batch of FEN strings into a PyTorch tensor of shape (batch_size, 18, 8, 8).
+    Convert a batch of FEN strings into a numpy array of shape (18, 8, 8).
 
     Args:
         fen (str): FEN notaion as a string
 
     Returns:
-        torch.Tensor: PyTorch tensor of shape (batch_size, 18, 8, 8)
+        np.array: numpy array of shape (18, 8, 8)
     """
 
-    batch_size = len(fens)
-    x = torch.zeros((batch_size, 18, 8, 8), dtype=torch.float32)
+
+    x = np.zeros((18, 8, 8), dtype=np.uint8)
 
     piece_to_plane = {
         'P': 0, 'N': 1, 'B': 2, 'R': 3, 'Q': 4, 'K': 5,
         'p': 6, 'n': 7, 'b': 8, 'r': 9, 'q': 10, 'k': 11,
     }
 
-    for i, fen in enumerate(fens):
-        board, side, castling, ep, _, _ = fen.split()
+    board, side, castling, ep, _, _ = fen.split()
 
-        rows = board.split('/')
-        for r, row in enumerate(rows):
-            c = 0
-            for ch in row:
-                if ch.isdigit():
-                    c += int(ch)
-                else:
-                    x[i, piece_to_plane[ch], r, c] = 1.0
-                    c += 1
+    rows = board.split('/')
+    for r, row in enumerate(rows):
+        c = 0
+        for ch in row:
+            if ch.isdigit():
+                c += int(ch)
+            else:
+                x[piece_to_plane[ch], r, c] = 1
+                c += 1
 
-        if side == 'w':
-            x[i, 12].fill_(1.0)
+    if side == 'w':
+        x[12, :, :] = 1
+    if 'K' in castling:
+        x[13, :, :] = 1
+    if 'Q' in castling:
+        x[14, :, :] = 1
+    if 'k' in castling:
+        x[15, :, :] = 1
+    if 'q' in castling:
+        x[16, :, :] = 1
 
-        if 'K' in castling:
-            x[i, 13].fill_(1.0)
-        if 'Q' in castling:
-            x[i, 14].fill_(1.0)
-        if 'k' in castling:
-            x[i, 15].fill_(1.0)
-        if 'q' in castling:
-            x[i, 16].fill_(1.0)
-
-        if ep != '-':
-            file = ord(ep[0]) - ord('a')
-            rank = 8 - int(ep[1])
-            x[i, 17, rank, file] = 1.0
+    if ep != '-':
+        file = ord(ep[0]) - ord('a')
+        rank = 8 - int(ep[1])
+        x[17, rank, file] = 1
 
     return x
 

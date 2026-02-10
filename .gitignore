@@ -3,6 +3,9 @@ __pycache__/
 *.py[codz]
 *$py.class
 
+# Binary datasets
+*.bin
+
 # PyTorch tensors
 *.pt
 

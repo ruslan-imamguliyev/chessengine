@@ -9,6 +9,7 @@ class DataIngestionConfig:
     method: str
     available_methods: dict
 
+
 @dataclass(frozen=True)
 class DataPreprocessingConfig:
     input_path: str
@@ -18,11 +19,24 @@ class DataPreprocessingConfig:
     min_mate_value: int
     scaling_factor: int
 
+
 @dataclass(frozen=True)
 class DataTransformationConfig:
-    output_dir: str
-    shard_size: int
+    output_path: str
     input_file: str
+    feature_filename: str
+    target_filename: str
+
+
+@dataclass(frozen=True)
+class DatasetEntityConfig:
+    input_path: str
+    feature_filename: str
+    target_filename: str
+    batch_size: int
+    shuffle: bool
+    num_workers: int
+    num_samples: int
 
 
 class ConfigurationManager:
@@ -34,9 +48,10 @@ class ConfigurationManager:
     def get_data_transformation_config(self) -> DataTransformationConfig:
         config = self.config['data_transformation']
         return DataTransformationConfig(
-            output_dir=config['output_dir'],
-            shard_size=config['shard_size'],
-            input_file=config['input_file']
+            output_path=config['output_path'],
+            input_file=config['input_file'],
+            feature_filename=config['feature_filename'],
+            target_filename=config['target_filename']
         )
 
     def get_data_ingestion_config(self) -> DataIngestionConfig:
@@ -58,4 +73,17 @@ class ConfigurationManager:
             max_mate_value=config['max_mate_value'],
             min_mate_value=config['min_mate_value'],
             scaling_factor=config['scaling_factor']
+        )
+
+    def get_dataset_entity_config(self) -> DatasetEntityConfig:
+        config = self.config['dataset_entity']
+        
+        return DatasetEntityConfig(
+            input_path=config['input_path'],
+            feature_filename=config['feature_filename'],
+            target_filename=config['target_filename'],
+            batch_size=config['batch_size'],
+            shuffle=config['shuffle'],
+            num_workers=config['num_workers'],
+            num_samples=config['num_samples']
         )
