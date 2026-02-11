@@ -6,6 +6,9 @@ import os
 from src.logging import logger
 
 
+DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+
+
 class ChessDataset(Dataset):
     def __init__(self, x_path, y_path, num_samples):
         self.X = np.memmap(x_path, dtype='uint8', mode='r', shape=(num_samples, 18, 8))
@@ -36,20 +39,19 @@ class DatasetEntity:
             batch_size=self.config.batch_size,
             shuffle=self.config.shuffle,
             num_workers=self.config.num_workers,
-            pin_memory=True,
-            prefetch_factor=2
+            pin_memory=DEVICE == "cuda"
         )
     
     def get_data_set(self) -> ChessDataset:
         x_path = os.path.join(self.config.input_path, self.config.feature_filename)
         y_path = os.path.join(self.config.input_path, self.config.target_filename)
-        
-        if not self.config.num_samples:
-            self.config.num_samples = os.path.getsize(x_path) // (18 * 8)
-            logger.info("num_samples not specified, using full dataset of length: {}".format(self.config.num_samples))
+        num_samples = self.config.num_samples
+        if not num_samples:
+            num_samples = os.path.getsize(x_path) // (18 * 8)
+            logger.info("num_samples not specified, using full dataset of length: {}".format(num_samples))
         
         return ChessDataset(
                 x_path=x_path,
                 y_path=y_path,
-                num_samples=self.config.num_samples
+                num_samples=num_samples
             )

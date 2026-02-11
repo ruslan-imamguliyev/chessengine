@@ -3,6 +3,7 @@ from src.utils import fen_to_tensor
 from src.logging import logger
 from math import ceil
 import os
+from src.utils import create_paths
 from src.config.manager import ConfigurationManager
 import pandas as pd
 
@@ -13,14 +14,8 @@ class DataTransformator:
 
 
     def transform(self) -> None:
-
-        if not os.path.exists(self.config.output_path):
-            logger.info("Making directory for the transformed dataset: " + self.config.output_path)
-            try:
-                os.makedirs(self.config.output_path)
-            except Exception as e:
-                logger.exception("Failed to create directory for the transformed dataset.")
-                raise e
+        
+        create_paths(self.config.output_path)
         
         logger.info("Reading the full dataset.")
         df = pd.read_csv(self.config.input_file)

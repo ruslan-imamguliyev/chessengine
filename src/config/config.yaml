@@ -25,7 +25,7 @@ dataset_entity:
   feature_filename: features_x.bin
   target_filename: targets_y.bin
   batch_size: 1024
-  shuffle: False
+  shuffle: True
   num_workers: 4
-  # Set to None to use the whole dataset
-  num_samples: 1000000
+  # Set to 'null' to use the whole dataset
+  num_samples: null

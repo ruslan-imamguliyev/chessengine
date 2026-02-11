@@ -3,6 +3,8 @@ from pathlib import Path
 from typing import Union, List
 from box.exceptions import BoxValueError
 import numpy as np
+from src.logging import logger
+import os
 
 
 def fen_to_tensor(
@@ -10,16 +12,13 @@ def fen_to_tensor(
     ) -> np.array:
 
     """
-    Convert a batch of FEN strings into a numpy array of shape (18, 8, 8).
-
-    Args:
-        fen (str): FEN notaion as a string
-
-    Returns:
-        np.array: numpy array of shape (18, 8, 8)
+    Convert a FEN string into a numpy array of shape (18, 8, 8).
+    
+    :param fen: FEN notation of a position
+    :type fen: str
+    :return: Numpy array
+    :rtype: Any
     """
-
-
     x = np.zeros((18, 8, 8), dtype=np.uint8)
 
     piece_to_plane = {
@@ -58,6 +57,28 @@ def fen_to_tensor(
     return x
 
 
+def create_paths(
+        path: Union[Union[str, Path], Union[List[str], List[Path]]]
+    ) -> None:
+    """
+    Makes paths if they don't exist.
+    
+    :param path: Either a string of the path or the Path object. May be a list of those.
+    :type path: Union[Union[str, Path], Union[List[str], List[Path]]]
+    """
+    if type(path) in [str, Path]:
+        path = [path]
+    
+    for p in path:
+        if not os.path.exists(p):
+            logger.info("Making path for the " + str(p))
+            try:
+                os.makedirs(p)
+            except Exception as e:
+                logger.exception("Couldn't make path: " + str(e))
+                raise e
+    
+    
 
 
 def read_yaml(
@@ -65,16 +86,11 @@ def read_yaml(
     ) -> dict:
     """
     Reads .yaml file and returns python dict.
-
-    Args:
-        path_to_yaml (str): path like input
-
-    Raises:
-        ValueError: if yaml file is empty
-        e: empty file
-
-    Returns:
-        dict: python dict
+    
+    :param path_to_yaml: Path to the .yaml file
+    :type path_to_yaml: Union[str, Path]
+    :return: Python dictionary
+    :rtype: dict
     """
     try:
         with open(path_to_yaml) as yaml_file:

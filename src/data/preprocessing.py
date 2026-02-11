@@ -3,6 +3,7 @@ from src.config.manager import ConfigurationManager
 import pandas as pd
 from glob import glob
 import os
+from src.utils import create_paths
 from src.logging import logger
 
 
@@ -38,15 +39,8 @@ class DataPreprocessor:
         ).apply(lambda x: np.tanh(x / self.config.scaling_factor))
 
         
-        if not os.path.exists(self.config.output_path):
-            logger.info("Making directory for the preprocessed dataset: " + self.config.output_path)
-            try:
-                os.makedirs(self.config.output_path)
-            except Exception as e:
-                logger.exception("Failed to create directory for the preprocessed dataset.")
-                raise e
+        create_paths(self.config.output_path)
             
-        
 
         logger.info("Saving preprocessed dataframe to the output path: " + self.config.output_path)
 

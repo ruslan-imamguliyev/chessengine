@@ -5,6 +5,7 @@ import shutil
 import kagglehub
 import zipfile
 from src.logging import logger
+from src.utils import create_paths
 from abc import ABC, abstractmethod
 from pathlib import Path
 from box import ConfigBox
@@ -69,9 +70,7 @@ class KaggleDatasetIngestor(DatasetIngestor):
 
     def ingest(self) -> None:
         current_path = Path(os.getcwd()) / Path(self.config.install_path)
-        if not os.path.exists(current_path):
-            logger.info("Making directory for the dataset: " + str(current_path))
-            os.makedirs(current_path)
+        create_paths(current_path)
         
         logger.info("Downloading the dataset to this path: " + str(current_path))
         
