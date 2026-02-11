@@ -34,6 +34,7 @@ class DatasetEntityConfig:
     input_path: str
     feature_filename: str
     target_filename: str
+    val_split: float
     batch_size: int
     shuffle: bool
     num_workers: int
@@ -86,6 +87,7 @@ class ConfigurationManager:
             target_filename=config['target_filename'],
             batch_size=config['batch_size'],
             shuffle=config['shuffle'],
+            val_split=config['val_split'],
             num_workers=config['num_workers'],
             num_samples=config['num_samples']
         )
