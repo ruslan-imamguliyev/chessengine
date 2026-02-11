@@ -17,8 +17,9 @@ data_preprocessing:
 data_transformation:
   output_path: dataset/transformed/
   input_file: dataset/preprocessed/preprocessed.csv
-  feature_filename: features
-  target_filename: targets
+  test_split: 0.05
+  feature_filename: x
+  target_filename: y
 
 dataset_entity:
   input_path: dataset/transformed/

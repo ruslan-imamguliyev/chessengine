@@ -24,6 +24,7 @@ class DataPreprocessingConfig:
 class DataTransformationConfig:
     output_path: str
     input_file: str
+    test_split: float
     feature_filename: str
     target_filename: str
 
@@ -50,6 +51,7 @@ class ConfigurationManager:
         return DataTransformationConfig(
             output_path=config['output_path'],
             input_file=config['input_file'],
+            test_split=config['test_split'],
             feature_filename=config['feature_filename'],
             target_filename=config['target_filename']
         )

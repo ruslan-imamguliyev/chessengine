@@ -1,4 +1,5 @@
 import numpy as np
+import tqdm
 from src.utils import fen_to_tensor
 from src.logging import logger
 from math import ceil
@@ -20,41 +21,61 @@ class DataTransformator:
         logger.info("Reading the full dataset.")
         df = pd.read_csv(self.config.input_file)
 
+        logger.info("Shuffling and splitting the dataset into train and test sets.")
 
+        shuffled_indices = np.random.permutation(len(df))
+        test_split = int(len(df) * self.config.test_split)
+        train_df = df.iloc[shuffled_indices[test_split:]]
+        test_df = df.iloc[shuffled_indices[:test_split]]
+
+        logger.info("Initializing memory-mapped files for train set.")
+
+        self.save(train_df, "train")
+        
+        logger.info("Initializing memory-mapped files for test set.")
+
+        self.save(test_df, "test")
+
+        logger.info("Successfully transformed the dataset and saved to memory-mapped files.")
+
+    def save(
+            self,
+            df: pd.DataFrame,
+            prefix: str
+        ) -> None:
         num_samples = len(df)
-
-        logger.info("Initializing memory-mapped files for features and targets.")
-
         try:
             feature_filepath = os.path.join(
                 self.config.output_path,
-                self.config.feature_filename
+                prefix + "_" + self.config.feature_filename
             )
             target_filepath = os.path.join(
                 self.config.output_path,
-                self.config.target_filename
+                prefix + "_" + self.config.target_filename
             )
 
             X = np.memmap(
-                f"{feature_filepath}_x.bin",
+                f"{feature_filepath}.bin",
                 dtype='uint8', mode='w+',
                 shape=(num_samples, 18, 8)
             )
 
             Y = np.memmap(
-                f"{target_filepath}_y.bin",
+                f"{target_filepath}.bin",
                 dtype='float32',
                 mode='w+',
                 shape=(num_samples,)
             )
         except Exception as e:
-            logger.exception("Failed to initialize memory-mapped files.")
+            logger.exception("Failed to initialize memory-mapped files: " + str(e))
             raise e
         
         logger.info("Processing dataset in chunks and writing to memory-mapped files.")
         
         fen_list = df['FEN'].to_list()
         eval_list = df['Evaluation'].to_list()
+
+        pbar = tqdm.tqdm(total=num_samples, desc="Transforming dataset", unit="positions")
 
         for i, (fen, evaluation) in enumerate(zip(fen_list, eval_list)):
             tensor_bool = fen_to_tensor(fen)
@@ -66,9 +87,6 @@ class DataTransformator:
             
             if i % 100000 == 0:
                 X.flush() # Periodically write to disk to keep RAM clear
-                print(f"Processed {i} positions...")
+                pbar.update(100000)
         
         del X, Y
-
-        logger.info("Successfully transformed the dataset and saved to memory-mapped files.")
-
