@@ -22,3 +22,6 @@ class ModelManager:
                 return ChessResNet(**params)
             case _:
                 raise ValueError(f"Model '{current_model}' is not implemented yet.")
+    
+    def get_model_name(self) -> str:
+        return self.config.current_model
