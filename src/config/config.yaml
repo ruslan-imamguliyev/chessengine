@@ -33,12 +33,45 @@ dataset_entity:
   num_samples: null
 
 models:
-  current_model: resnet_3M_se
+  current_model: resnet_24M_se
   available_models:
+
     resnet_3M_se:
       model_type: resnet
       params:
         num_blocks: 10
         num_filters: 128
         value_head_hidden: 128
+        use_se: True
+    
+    resnet_18M_se:
+      model_type: resnet
+      params:
+        num_blocks: 15
+        num_filters: 256
+        value_head_hidden: 256
+        use_se: True
+    
+    resnet_24M_se:
+      model_type: resnet
+      params:
+        num_blocks: 20
+        num_filters: 256
+        value_head_hidden: 256
+        use_se: True
+    
+    resnet_54M_se:
+      model_type: resnet
+      params:
+        num_blocks: 20
+        num_filters: 384
+        value_head_hidden: 256
+        use_se: True
+    
+    resnet_143M_se:
+      model_type: resnet
+      params:
+        num_blocks: 30
+        num_filters: 512
+        value_head_hidden: 512
         use_se: True
