@@ -3,10 +3,8 @@ from torch.utils.data import Dataset, DataLoader, Subset
 import numpy as np
 from src.config.manager import ConfigurationManager
 import os
+from src.constants import DEVICE
 from src.logging import logger
-
-
-DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 
 class ChessDataset(Dataset):
@@ -75,7 +73,7 @@ class DatasetEntity:
         return DataLoader(
             self.get_data_set(mode=mode),
             batch_size=self.config.batch_size,
-            shuffle=self.config.shuffle,
+            shuffle=self.config.shuffle if mode == "train" else False,
             num_workers=self.config.num_workers,
             pin_memory=DEVICE == "cuda"
         )

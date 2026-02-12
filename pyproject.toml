@@ -28,7 +28,8 @@ dev = [
 ]
 research = [
     "notebook (>=7.5.0,<8.0.0)",
-    "matplotlib (>=3.10.8,<4.0.0)"
+    "matplotlib (>=3.10.8,<4.0.0)",
+    "mlflow (>=3.9.0,<4.0.0)",
 ]
 
 [tool.poetry.group.research]

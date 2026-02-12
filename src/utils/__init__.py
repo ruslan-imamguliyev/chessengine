@@ -6,6 +6,19 @@ import numpy as np
 from src.logging import logger
 import matplotlib.pyplot as plt
 import os
+import torch
+
+
+def count_parameters(model: torch.nn.Module) -> int:
+    """
+    Count trainable parameters in the model.
+    
+    :param model: pytorch model
+    :type model: torch.nn.Module
+    :return: num of parameters
+    :rtype: int
+    """
+    return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
 
 def fen_to_tensor(

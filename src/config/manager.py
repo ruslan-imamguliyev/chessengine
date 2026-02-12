@@ -41,6 +41,12 @@ class DatasetEntityConfig:
     num_samples: int
 
 
+@dataclass(frozen=True)
+class ModelConfig:
+    current_model: str
+    available_models: dict
+
+
 class ConfigurationManager:
     def __init__(self,
                  config_path: str = PATH_TO_CONFIG_FILE
@@ -90,4 +96,13 @@ class ConfigurationManager:
             val_split=config['val_split'],
             num_workers=config['num_workers'],
             num_samples=config['num_samples']
+        )
+
+    def get_model_config(self) -> ModelConfig:
+        current_model = self.config['models']['current_model']
+        available_models = self.config['models']['available_models']
+
+        return ModelConfig(
+            current_model=current_model,
+            available_models=available_models
         )
