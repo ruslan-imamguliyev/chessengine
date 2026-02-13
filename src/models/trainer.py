@@ -6,7 +6,7 @@ from torch.utils.data import DataLoader
 import mlflow
 
 from pathlib import Path
-import tqdm
+from tqdm import tqdm
 import numpy as np
 import time
 import json
@@ -74,6 +74,7 @@ class ChessTrainerMLflow:
         )
         
         create_paths(self.config.checkpoint_dir)
+        self.checkpoint_dir = Path(self.config.checkpoint_dir)
         
         self.history = {
             'train_loss': [],

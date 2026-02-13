@@ -25,15 +25,15 @@ dataset_entity:
   input_path: dataset/transformed/
   feature_filename: x.bin
   target_filename: y.bin
-  batch_size: 1024
-  shuffle: True
+  batch_size: 512
+  shuffle: False
   val_split: 0.05
-  num_workers: 4
+  num_workers: 2
   # Set to 'null' to use the whole dataset
   num_samples: null
 
 models:
-  current_model: resnet_24M_se
+  current_model: resnet_3M_se
   available_models:
 
     resnet_3M_se:
@@ -78,7 +78,7 @@ models:
 
 model_trainer:
   learning_rate: 0.001
-  weight_decay: 1e-4
+  weight_decay: 1.0e-4
   checkpoint_dir: checkpoints/
-  num_epochs: 50
+  num_epochs: 1
   early_stopping_patience: 10
