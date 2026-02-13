@@ -75,3 +75,10 @@ models:
         num_filters: 512
         value_head_hidden: 512
         use_se: True
+
+model_trainer:
+  learning_rate: 0.001
+  weight_decay: 1e-4
+  checkpoint_dir: checkpoints/
+  num_epochs: 50
+  early_stopping_patience: 10

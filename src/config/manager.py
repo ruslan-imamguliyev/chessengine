@@ -47,6 +47,15 @@ class ModelConfig:
     available_models: dict
 
 
+@dataclass(frozen=True)
+class ModelTrainerConfig:
+    learning_rate: float
+    weight_decay: float
+    checkpoint_dir: str
+    num_epochs: int
+    early_stopping_patience: int
+
+
 class ConfigurationManager:
     def __init__(self,
                  config_path: str = PATH_TO_CONFIG_FILE
@@ -105,4 +114,15 @@ class ConfigurationManager:
         return ModelConfig(
             current_model=current_model,
             available_models=available_models
+        )
+
+    def get_model_trainer_config(self) -> ModelTrainerConfig:
+        config = self.config['model_trainer']
+
+        return ModelTrainerConfig(
+            learning_rate=config['learning_rate'],
+            weight_decay=config['weight_decay'],
+            checkpoint_dir=config['checkpoint_dir'],
+            num_epochs=config['num_epochs'],
+            early_stopping_patience=config['early_stopping_patience']
         )
