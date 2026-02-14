@@ -25,8 +25,6 @@ class DataTransformationConfig:
     output_path: str
     input_file: str
     test_split: float
-    feature_filename: str
-    target_filename: str
 
 
 @dataclass(frozen=True)
@@ -67,9 +65,7 @@ class ConfigurationManager:
         return DataTransformationConfig(
             output_path=config['output_path'],
             input_file=config['input_file'],
-            test_split=config['test_split'],
-            feature_filename=config['feature_filename'],
-            target_filename=config['target_filename']
+            test_split=config['test_split']
         )
 
     def get_data_ingestion_config(self) -> DataIngestionConfig:

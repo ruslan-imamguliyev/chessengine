@@ -8,34 +8,15 @@ from src.logging import logger
 
 
 class ChessDataset(Dataset):
-    def __init__(self, x_path, y_path, num_samples, start_idx=0):
-        self.num_samples = num_samples
-        
-        x_offset = start_idx * (18 * 8)
-        y_offset = start_idx * 4
-        
-        self.X = np.memmap(x_path, dtype='uint8', mode='r', 
-                           offset=x_offset, 
-                           shape=(num_samples, 18, 8))
-        
-        self.Y = np.memmap(y_path, dtype='float32', mode='r', 
-                           offset=y_offset, 
-                           shape=(num_samples,))
-
+    def __init__(self, encodings, evaluations):
+        self.encodings = encodings
+        self.evaluations = evaluations
+    
     def __len__(self):
-        return self.num_samples
-
+        return len(self.evaluations)
+    
     def __getitem__(self, idx):
-        # packed_features is now (18, 8)
-        packed_features = self.X[idx]
-        
-        # Unpack bits: (18, 8) -> (18, 64) -> reshape to (18, 8, 8)
-        unpacked = np.unpackbits(packed_features, axis=-1)
-        features = unpacked.reshape(18, 8, 8).astype(np.float32)
-        
-        target = torch.tensor(self.Y[idx], dtype=torch.float32)
-        
-        return torch.from_numpy(features.copy()), target
+        return self.encodings[idx], self.evaluations[idx]
 
 
 class DatasetEntity:

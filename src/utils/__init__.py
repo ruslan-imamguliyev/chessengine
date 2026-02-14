@@ -31,7 +31,7 @@ def fen_to_tensor(
     :param fen: FEN notation of a position
     :type fen: str
     :return: Numpy array
-    :rtype: Any
+    :rtype: np.array:
     """
     x = np.zeros((18, 8, 8), dtype=np.uint8)
 
