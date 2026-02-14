@@ -24,19 +24,15 @@ class DataPreprocessingConfig:
 class DataTransformationConfig:
     output_path: str
     input_file: str
-    test_split: float
+    val_split: float
 
 
 @dataclass(frozen=True)
 class DatasetEntityConfig:
     input_path: str
-    feature_filename: str
-    target_filename: str
-    val_split: float
     batch_size: int
     shuffle: bool
     num_workers: int
-    num_samples: int
 
 
 @dataclass(frozen=True)
@@ -65,7 +61,7 @@ class ConfigurationManager:
         return DataTransformationConfig(
             output_path=config['output_path'],
             input_file=config['input_file'],
-            test_split=config['test_split']
+            val_split=config['val_split']
         )
 
     def get_data_ingestion_config(self) -> DataIngestionConfig:
@@ -94,13 +90,9 @@ class ConfigurationManager:
         
         return DatasetEntityConfig(
             input_path=config['input_path'],
-            feature_filename=config['feature_filename'],
-            target_filename=config['target_filename'],
             batch_size=config['batch_size'],
             shuffle=config['shuffle'],
-            val_split=config['val_split'],
-            num_workers=config['num_workers'],
-            num_samples=config['num_samples']
+            num_workers=config['num_workers']
         )
 
     def get_model_config(self) -> ModelConfig:

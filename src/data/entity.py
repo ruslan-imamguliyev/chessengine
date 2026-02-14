@@ -20,27 +20,25 @@ class ChessDataset(Dataset):
 
 
 class DatasetEntity:
-    def __init__(self, config):
+    def __init__(self, config: ConfigurationManager):
         self.config = config.get_dataset_entity_config()
-
-        train_xpath = os.path.join(self.config.input_path, f"train_{self.config.feature_filename}")
-        train_ypath = os.path.join(self.config.input_path, f"train_{self.config.target_filename}")
-        test_xpath = os.path.join(self.config.input_path, f"test_{self.config.feature_filename}")
-        test_ypath = os.path.join(self.config.input_path, f"test_{self.config.target_filename}")
         
-        total_train_samples = os.path.getsize(train_xpath) // (18 * 8) if not self.config.num_samples else self.config.num_samples
-        test_num_samples = os.path.getsize(test_xpath) // (18 * 8) if not self.config.num_samples else self.config.num_samples
+        train_path = os.path.join(self.config.input_path, "train.pth")
+        val_path = os.path.join(self.config.input_path, "val.pth")
 
-        val_size = int(total_train_samples * self.config.val_split)
-        train_size = total_train_samples - val_size
+        train_metadata = torch.load(train_path)
+        val_metadata = torch.load(val_path)
 
-        logger.info(f"Total train file: {total_train_samples} samples. Splitting into:")
-        logger.info(f"  -> Train: {train_size}")
-        logger.info(f"  -> Val:   {val_size}")
+        train_num_samples = train_metadata['num_samples']
+        val_num_samples = val_metadata['num_samples']
 
-        self.train_set = ChessDataset(train_xpath, train_ypath, num_samples=train_size, start_idx=0)
-        self.val_set = ChessDataset(train_xpath, train_ypath, num_samples=val_size, start_idx=train_size)
-        self.test_set = ChessDataset(test_xpath, test_ypath, num_samples=test_num_samples, start_idx=0)
+        logger.info(f"Creating train dataset with {train_num_samples} samples.")
+        logger.info(f"Creating val dataset with {val_num_samples} samples.")
+
+        self.train_set = ChessDataset(train_metadata['features_tensor'], train_metadata['targets_tensor'])
+        self.val_set = ChessDataset(val_metadata['features_tensor'], val_metadata['targets_tensor'])
+
+        del train_metadata, val_metadata
 
     def get_data_loader(self, mode: str) -> DataLoader:
         dataset = self.get_data_set(mode)
@@ -55,9 +53,8 @@ class DatasetEntity:
             persistent_workers=True
         )
     
-    def get_data_set(self, mode: str):
+    def get_data_set(self, mode: str) -> ChessDataset:
         match mode:
             case "train": return self.train_set
             case "val": return self.val_set
-            case "test": return self.test_set
             case _: raise ValueError(f"Invalid mode: {mode}")

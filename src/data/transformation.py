@@ -24,17 +24,17 @@ class DataTransformator:
         # TODO: delete nrows
         df = pd.read_csv(self.config.input_file, nrows=1_000_000)
 
-        logger.info("Shuffling and splitting the dataset into train and test sets.")
+        logger.info("Shuffling and splitting the dataset into train and val sets.")
 
         shuffled_indices = np.random.permutation(len(df))
-        test_split = int(len(df) * self.config.test_split)
-        train_df = df.iloc[shuffled_indices[test_split:]]
-        test_df = df.iloc[shuffled_indices[:test_split]]
+        val_split = int(len(df) * self.config.val_split)
+        train_df = df.iloc[shuffled_indices[val_split:]]
+        val_df = df.iloc[shuffled_indices[:val_split]]
 
         self.save(train_df, "train")
-        self.save(test_df, "test")
+        self.save(val_df, "val")
 
-        logger.info("Successfully transformed the dataset and saved to .pt files.")
+        logger.info("Successfully transformed the dataset and saved to .pth files.")
 
     def save(
             self,
@@ -47,7 +47,7 @@ class DataTransformator:
 
         output_filepath = os.path.join(
             self.config.output_path,
-            prefix + ".pt"
+            prefix + ".pth"
         )
         
         features = np.zeros((num_samples, 18, 8, 8), dtype=np.uint8)
