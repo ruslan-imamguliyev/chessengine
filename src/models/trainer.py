@@ -116,8 +116,8 @@ class ChessTrainerMLflow:
         
         pbar = tqdm(self.train_loader, desc=f'Epoch {epoch} [Train]')
         for batch_idx, (positions, evaluations) in enumerate(pbar):
-            positions = positions.to(self.device)
-            evaluations = evaluations.to(self.device)
+            positions = positions.to(self.device, non_blocking=self.device == "cuda").to(torch.float32)
+            evaluations = evaluations.to(self.device, non_blocking=self.device == "cuda")
             
             
             self.optimizer.zero_grad()
@@ -161,8 +161,8 @@ class ChessTrainerMLflow:
         with torch.no_grad():
             pbar = tqdm(self.val_loader, desc=f'Epoch {epoch} [Val]')
             for positions, evaluations in pbar:
-                positions = positions.to(self.device)
-                evaluations = evaluations.to(self.device)
+                positions = positions.to(self.device, non_blocking=self.device == "cuda").to(torch.float32)
+                evaluations = evaluations.to(self.device, non_blocking=self.device == "cuda")
                 
                 predictions = self.model(positions)
                 loss = self.criterion(predictions, evaluations)

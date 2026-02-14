@@ -21,7 +21,7 @@ data_transformation:
 
 dataset_entity:
   input_path: dataset/transformed/
-  batch_size: 512
+  batch_size: 1024
   shuffle: False
   num_workers: 2
 
