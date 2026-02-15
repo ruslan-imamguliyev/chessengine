@@ -21,8 +21,8 @@ class DataTransformator:
         
         logger.info("Reading the full dataset.")
 
-        # TODO: delete nrows
-        df = pd.read_csv(self.config.input_file, nrows=1_000_000)
+        # df = pd.read_csv(self.config.input_file, nrows=1_000_000)
+        df = pd.read_csv(self.config.input_file)
 
         logger.info("Shuffling and splitting the dataset into train and val sets.")
 
