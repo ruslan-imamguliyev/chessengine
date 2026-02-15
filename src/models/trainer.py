@@ -56,6 +56,7 @@ class ChessTrainerMLflow:
         self.config = config.get_model_trainer_config()
         
         self.model = model.to(device)
+        self.model = torch.compile(self.model)
         self.model_name = model_name
         self.train_loader = train_loader
         self.val_loader = val_loader
