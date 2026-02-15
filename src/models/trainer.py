@@ -121,7 +121,7 @@ class ChessTrainerMLflow:
             positions = positions.to(self.device, non_blocking=self.device == "cuda").to(torch.float32)
             evaluations = evaluations.to(self.device, non_blocking=self.device == "cuda")
             
-            with autocast():
+            with autocast(device_type="cuda"):
                 predictions = self.model(positions)
                 loss = self.criterion(predictions, evaluations)
             
