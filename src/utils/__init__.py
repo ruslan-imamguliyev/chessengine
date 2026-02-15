@@ -205,7 +205,7 @@ def create_paths(
     :param path: Either a string of the path or the Path object. May be a list of those.
     :type path: Union[Union[str, Path], Union[List[str], List[Path]]]
     """
-    if type(path) in [str, Path]:
+    if type(path) != list:
         path = [path]
     
     for p in path:
