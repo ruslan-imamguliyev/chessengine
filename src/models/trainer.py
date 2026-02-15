@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
+from torch.amp import autocast, GradScaler
 
 import mlflow
 
@@ -59,7 +60,7 @@ class ChessTrainerMLflow:
         self.train_loader = train_loader
         self.val_loader = val_loader
         self.device = device
-
+        self.scaler = GradScaler()
         self.criterion = nn.MSELoss()
         self.optimizer = optim.AdamW(
             model.parameters(),
@@ -116,22 +117,25 @@ class ChessTrainerMLflow:
         
         pbar = tqdm(self.train_loader, desc=f'Epoch {epoch} [Train]')
         for batch_idx, (positions, evaluations) in enumerate(pbar):
+            
             positions = positions.to(self.device, non_blocking=self.device == "cuda").to(torch.float32)
             evaluations = evaluations.to(self.device, non_blocking=self.device == "cuda")
             
+            with autocast():
+                predictions = self.model(positions)
+                loss = self.criterion(predictions, evaluations)
             
-            self.optimizer.zero_grad()
-            predictions = self.model(positions)
-            loss = self.criterion(predictions, evaluations)
             
-            
-            loss.backward()
+            self.scaler.scale(loss).backward()
             
             
             torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0)
             
-            self.optimizer.step()
+            self.scaler.step(self.optimizer)
+            self.scaler.update()
             
+            self.optimizer.zero_grad()
+
             total_loss += loss.item()
             all_predictions.append(predictions)
             all_targets.append(evaluations)
