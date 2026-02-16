@@ -46,7 +46,7 @@ class DatasetEntity:
         return DataLoader(
             dataset,
             batch_size=self.config.batch_size,
-            shuffle=self.config.shuffle,
+            shuffle=self.config.shuffle and mode == "train",
             num_workers=self.config.num_workers,
             pin_memory=(DEVICE == "cuda"),
             prefetch_factor=self.config.num_workers // 2,
