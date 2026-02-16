@@ -72,7 +72,7 @@ class ChessTrainerMLflow:
         self.scheduler = optim.lr_scheduler.CosineAnnealingLR(
             self.optimizer,
             T_max=50,
-            eta_min=1e-6
+            eta_min=1e-4
         )
         
         create_paths(self.config.checkpoint_dir)

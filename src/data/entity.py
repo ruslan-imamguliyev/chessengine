@@ -49,7 +49,7 @@ class DatasetEntity:
             shuffle=self.config.shuffle and mode == "train",
             num_workers=self.config.num_workers,
             pin_memory=(DEVICE == "cuda"),
-            prefetch_factor=self.config.num_workers // 2,
+            prefetch_factor=max(self.config.num_workers // 2, 1),
             persistent_workers=True
         )
     

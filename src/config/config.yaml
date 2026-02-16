@@ -21,9 +21,9 @@ data_transformation:
 
 dataset_entity:
   input_path: dataset/transformed/
-  batch_size: 1024
-  shuffle: False
-  num_workers: 2
+  batch_size: 32
+  shuffle: True
+  num_workers: 1
 
 models:
   current_model: resnet_3M_se
@@ -70,8 +70,8 @@ models:
         use_se: True
 
 model_trainer:
-  learning_rate: 0.001
+  learning_rate: 0.005
   weight_decay: 1.0e-4
   checkpoint_dir: checkpoints/
-  num_epochs: 1
+  num_epochs: 50
   early_stopping_patience: 10
