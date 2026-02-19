@@ -206,7 +206,11 @@ class ChessTrainerMLflow:
             logger.info(f'  ? Saved best model (val_loss: {val_loss:.6f})')
             
             
-            mlflow.pytorch.log_model(self.model, "best_model")
+            try:
+                mlflow.pytorch.log_model(self.model, name="best_model")
+            except Exception as e:
+                logger.exception("Failed to log the model: " + str(e))
+                #raise e
     
     def load_checkpoint(self, checkpoint_path):
         """Load model checkpoint."""
