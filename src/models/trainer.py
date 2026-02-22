@@ -203,8 +203,7 @@ class ChessTrainerMLflow:
         if is_best:
             best_path = self.checkpoint_dir / 'best_checkpoint.pth'
             torch.save(checkpoint, best_path)
-            logger.info(f'  ? Saved best model (val_loss: {val_loss:.6f})')
-            
+            logger.info(f'Saved best model (val_loss: {val_loss:.6f})')
             
             try:
                 mlflow.pytorch.log_model(self.model, name="best_model")
@@ -340,16 +339,16 @@ class ChessTrainerMLflow:
             mlflow.log_metric('total_training_time_minutes', total_time / 60)
             mlflow.log_metric('final_val_loss', val_loss)
             
-            
+            logger.info("Saving training history...")
             history_path = self.checkpoint_dir / 'training_history.json'
             with open(history_path, 'w') as f:
                 json.dump(self.history, f, indent=2)
             mlflow.log_artifact(str(history_path))
             
-            
+            logger.info("Saving checkpoints...")
             mlflow.log_artifacts(str(self.checkpoint_dir), artifact_path="checkpoints")
             
-            
+            logger.info("Generating loss curve...")
             try:
                 import matplotlib.pyplot as plt
                 plt.figure(figsize=(10, 6))
