@@ -35,6 +35,8 @@ class DatasetEntity:
         logger.info(f"Creating train dataset with {train_num_samples} samples.")
         logger.info(f"Creating val dataset with {val_num_samples} samples.")
 
+        # self.train_set = ChessDataset(train_metadata['features_tensor'][:self.config.batch_size], train_metadata['targets_tensor'][:self.config.batch_size])
+        # self.val_set = ChessDataset(val_metadata['features_tensor'][:self.config.batch_size], val_metadata['targets_tensor'][:self.config.batch_size])
         self.train_set = ChessDataset(train_metadata['features_tensor'], train_metadata['targets_tensor'])
         self.val_set = ChessDataset(val_metadata['features_tensor'], val_metadata['targets_tensor'])
 

@@ -124,7 +124,7 @@ class ChessTrainerMLflow:
             evaluations = evaluations.to(self.device, non_blocking=self.device == "cuda")
             
             with autocast(device_type="cuda"):
-                predictions = self.model(positions)
+                predictions = self.model(positions).squeeze(-1)
                 loss = self.criterion(predictions, evaluations)
             
             self.scaler.scale(loss).backward()

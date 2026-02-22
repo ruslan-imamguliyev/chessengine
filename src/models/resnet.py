@@ -123,6 +123,6 @@ class ChessResNet(nn.Module):
         v = v.view(v.size(0), -1)
         v = F.relu(self.value_fc1(v))
         v = self.value_fc2(v)
-        v = torch.tanh(v)
+        # v = torch.tanh(v)
         
         return v
