@@ -11,6 +11,7 @@ from tqdm import tqdm
 import numpy as np
 import time
 import json
+import os
 
 from src.logging import logger
 from src.utils import count_parameters, create_paths
@@ -76,7 +77,7 @@ class ChessTrainerMLflow:
         )
         
         create_paths(self.config.checkpoint_dir)
-        self.checkpoint_dir = Path(self.config.checkpoint_dir)
+        self.checkpoint_dir = Path(os.getcwd()) / Path(self.config.checkpoint_dir)
         
         self.history = {
             'train_loss': [],

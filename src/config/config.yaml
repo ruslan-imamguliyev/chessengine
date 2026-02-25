@@ -3,11 +3,11 @@ data_ingestion:
   available_methods:
     kagglehub:
       source: ronakbadhe/chess-evaluations
-      install_path: dataset/raw/
+      install_path: data/raw/
 
 data_preprocessing:
-  input_path: dataset/raw/
-  output_path: dataset/preprocessed/
+  input_path: data/raw/
+  output_path: data/preprocessed/
   output_file: preprocessed.csv
   max_mate_value: 30000
   min_mate_value: 1000
@@ -15,18 +15,18 @@ data_preprocessing:
 
 
 data_transformation:
-  output_path: dataset/transformed/
-  input_file: dataset/preprocessed/preprocessed.csv
+  output_path: data/transformed/
+  input_file: data/preprocessed/preprocessed.csv
   val_split: 0.05
 
 dataset_entity:
-  input_path: dataset/transformed/
+  input_path: data/transformed/
   batch_size: 2048
   shuffle: True
   num_workers: 8
 
 models:
-  current_model: resnet_24M_se
+  current_model: resnet_18M_se
   available_models:
 
     resnet_3M_se:
@@ -70,8 +70,8 @@ models:
         use_se: True
 
 model_trainer:
-  learning_rate: 0.003
+  learning_rate: 0.0003
   weight_decay: 5.0e-4
   checkpoint_dir: checkpoints/
   num_epochs: 50
-  early_stopping_patience: 50
+  early_stopping_patience: 10

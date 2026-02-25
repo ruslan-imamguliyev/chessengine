@@ -8,6 +8,7 @@ import torch
 from src.utils import create_paths
 from src.config.manager import ConfigurationManager
 import pandas as pd
+from pathlib import Path
 
 
 class DataTransformator:
@@ -16,8 +17,8 @@ class DataTransformator:
 
 
     def transform(self) -> None:
-        
-        create_paths(self.config.output_path)
+        self.output_path = Path(os.getcwd()) / Path(self.config.output_path)
+        create_paths(self.output_path)
         
         logger.info("Reading the full dataset.")
 
@@ -46,7 +47,7 @@ class DataTransformator:
         logger.info(f"Transforming {num_samples} entires of the {prefix} set.")
 
         output_filepath = os.path.join(
-            self.config.output_path,
+            self.output_path,
             prefix + ".pth"
         )
         

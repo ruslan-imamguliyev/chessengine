@@ -1,5 +1,6 @@
 import torch
 from torch.utils.data import Dataset, DataLoader, Subset
+from pathlib import Path
 import numpy as np
 from src.config.manager import ConfigurationManager
 import os
@@ -22,9 +23,11 @@ class ChessDataset(Dataset):
 class DatasetEntity:
     def __init__(self, config: ConfigurationManager):
         self.config = config.get_dataset_entity_config()
-        
-        train_path = os.path.join(self.config.input_path, "train.pth")
-        val_path = os.path.join(self.config.input_path, "val.pth")
+
+        input_path = Path(os.getcwd()) / Path(self.config.input_path)
+
+        train_path = os.path.join(input_path, "train.pth")
+        val_path = os.path.join(input_path, "val.pth")
 
         train_metadata = torch.load(train_path)
         val_metadata = torch.load(val_path)

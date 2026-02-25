@@ -3,6 +3,7 @@ from src.config.manager import ConfigurationManager
 import pandas as pd
 from glob import glob
 import os
+from pathlib import Path
 from src.utils import create_paths
 from src.logging import logger
 
@@ -15,12 +16,13 @@ class DataPreprocessor:
         self.config = config.get_data_preprocessing_config()
 
     def preprocess(self):
-        logger.info("Combining all dataframes into one.")
+        input_path = Path(os.getcwd()) / Path(self.config.input_path)
+        output_path = Path(os.getcwd()) / Path(self.config.output_path)
+        logger.info("Combining all dataframes into one from " + str(input_path))
         dfs = []
-        
-        for path in glob(self.config.input_path + "/*.csv"):
+        logger.info(str(input_path) + "/*.csv")
+        for path in glob(str(input_path) + "/*.csv"):
             logger.info("Reading dataframe at " + path)
-
             df = pd.read_csv(path)
             dfs.append(df)
         
@@ -39,14 +41,14 @@ class DataPreprocessor:
         ).apply(lambda x: np.tanh(x / self.config.scaling_factor))
 
         
-        create_paths(self.config.output_path)
+        create_paths(output_path)
             
 
-        logger.info("Saving preprocessed dataframe to the output path: " + self.config.output_path)
+        logger.info("Saving preprocessed dataframe to the output path: " + str(output_path))
 
         try:
             df.to_csv(os.path.join(
-                self.config.output_path,
+                output_path,
                 self.config.output_file
             ), index=False)
         except Exception as e:
