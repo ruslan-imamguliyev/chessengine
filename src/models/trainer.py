@@ -62,7 +62,10 @@ class ChessTrainerMLflow:
         self.val_loader = val_loader
         self.device = device
         self.scaler = GradScaler()
-        self.criterion = nn.MSELoss()
+
+        # self.criterion = nn.MSELoss()
+        self.criterion = nn.SmoothL1Loss(beta=self.config.beta)
+
         self.optimizer = optim.AdamW(
             model.parameters(),
             lr=self.config.learning_rate,
@@ -91,7 +94,7 @@ class ChessTrainerMLflow:
             raise e
         
     def calculate_metrics(self, predictions, targets):
-        """Calculate additional metrics beyond MSE."""
+        """Calculate additional metrics beyond loss."""
         predictions = predictions.detach().cpu().numpy().flatten()
         targets = targets.detach().cpu().numpy().flatten()
         
@@ -235,6 +238,8 @@ class ChessTrainerMLflow:
                 'learning_rate': self.optimizer.param_groups[0]['lr'],
                 'weight_decay': self.optimizer.param_groups[0]['weight_decay'],
                 'optimizer': 'AdamW',
+                'loss': 'SmootL1Loss',
+                'beta': self.config.beta,
                 'scheduler': 'CosineAnnealingLR',
                 'early_stopping_patience': self.config.early_stopping_patience,
                 'device': str(self.device),
@@ -355,7 +360,7 @@ class ChessTrainerMLflow:
                 plt.plot(self.history['train_loss'], label='Train Loss', alpha=0.7)
                 plt.plot(self.history['val_loss'], label='Val Loss', alpha=0.7)
                 plt.xlabel('Epoch')
-                plt.ylabel('MSE Loss')
+                plt.ylabel('Loss')
                 plt.title('Training and Validation Loss')
                 plt.legend()
                 plt.grid(True, alpha=0.3)

@@ -78,19 +78,7 @@ class ResidualBlockSE(nn.Module):
 
 
 class ChessResNet(nn.Module):
-    """
-    ResNet architecture for chess position evaluation.
-    
-    Input: (batch, 18, 8, 8) - 18 bitplanes representing chess position
-    Output: (batch, 1) - tanh-normalized evaluation (-1 to 1)
-    
-    Args:
-        num_blocks: Number of residual blocks (default: 15 for 16M positions)
-        num_filters: Number of convolutional filters (default: 256)
-        use_se: Whether to use Squeeze-and-Excitation blocks (default: True)
-        value_head_hidden: Hidden layer size in value head (default: 256)
-    """
-    def __init__(self, num_blocks=15, num_filters=256, use_se=True, value_head_hidden=256):
+    def __init__(self, num_blocks=15, num_filters=256, use_se=True, value_head_hidden=256, dropout_rate=0.0):
         super(ChessResNet, self).__init__()
         
         
@@ -108,6 +96,7 @@ class ChessResNet(nn.Module):
         self.value_bn = nn.BatchNorm2d(32)
         self.value_fc1 = nn.Linear(32 * 8 * 8, value_head_hidden)
         self.value_fc2 = nn.Linear(value_head_hidden, 1)
+        self.value_dropout = nn.Dropout(dropout_rate)
         
     def forward(self, x):
         x = self.input_conv(x)
@@ -122,6 +111,7 @@ class ChessResNet(nn.Module):
         v = F.relu(v)
         v = v.view(v.size(0), -1)
         v = F.relu(self.value_fc1(v))
+        v = self.value_dropout(v)
         v = self.value_fc2(v)
         # v = torch.tanh(v)
         

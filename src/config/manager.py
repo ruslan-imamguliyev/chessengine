@@ -48,6 +48,7 @@ class ModelTrainerConfig:
     checkpoint_dir: str
     num_epochs: int
     early_stopping_patience: int
+    beta: float
 
 
 class ConfigurationManager:
@@ -112,5 +113,6 @@ class ConfigurationManager:
             weight_decay=config['weight_decay'],
             checkpoint_dir=config['checkpoint_dir'],
             num_epochs=config['num_epochs'],
-            early_stopping_patience=config['early_stopping_patience']
+            early_stopping_patience=config['early_stopping_patience'],
+            beta=config['beta']
         )
