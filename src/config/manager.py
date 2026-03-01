@@ -51,6 +51,14 @@ class ModelTrainerConfig:
     beta: float
 
 
+@dataclass(frozen=True)
+class EngineConfig:
+    model_strategy: str
+    depth: int
+    tt_size_mb: int
+    time_limit: int
+
+
 class ConfigurationManager:
     def __init__(self,
                  config_path: str = PATH_TO_CONFIG_FILE
@@ -115,4 +123,14 @@ class ConfigurationManager:
             num_epochs=config['num_epochs'],
             early_stopping_patience=config['early_stopping_patience'],
             beta=config['beta']
+        )
+
+    def get_engine_config(self) -> EngineConfig:
+        config = self.config['engine']
+
+        return EngineConfig(
+            model_strategy=config['model_strategy'],
+            depth=config['depth'],
+            tt_size_mb=config['tt_size_mb'],
+            time_limit=config['time_limit']
         )

@@ -26,7 +26,7 @@ dataset_entity:
   num_workers: 1
 
 models:
-  current_model: resnet_18M_se
+  current_model: resnet_24M_se
   available_models:
 
     resnet_3M_se:
@@ -77,3 +77,9 @@ model_trainer:
   checkpoint_dir: checkpoints/
   num_epochs: 50
   early_stopping_patience: 50
+
+engine:
+  model_strategy: latest
+  depth: 5
+  tt_size_mb: 256
+  time_limit: 10
