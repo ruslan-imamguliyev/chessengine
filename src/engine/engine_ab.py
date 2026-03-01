@@ -9,7 +9,7 @@ from src.models import ModelManager
 from src.logging import logger
 
 
-class ChessEngine:
+class AlphaBetaEngine:
     """
     Chess engine using Alpha-Beta search with neural network evaluation.
     """
