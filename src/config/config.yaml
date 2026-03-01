@@ -80,6 +80,6 @@ model_trainer:
 
 engine:
   model_strategy: latest
-  depth: 5
+  depth: 4
   tt_size_mb: 256
-  time_limit: 10
+  time_limit: 120

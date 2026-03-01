@@ -1,6 +1,7 @@
 from typing import Optional, List, Tuple
 import time
 import chess
+import chess.polyglot
 from src.engine.tt import TranspositionTable
 from src.engine.model_wrapper import ModelWrapper
 from src.config.manager import ConfigurationManager
