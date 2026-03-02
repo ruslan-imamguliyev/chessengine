@@ -2,6 +2,7 @@ from yaml import safe_load
 from pathlib import Path
 from typing import Union, List
 from box.exceptions import BoxValueError
+import chess
 import numpy as np
 from src.logging import logger
 import matplotlib.pyplot as plt
@@ -19,6 +20,55 @@ def count_parameters(model: torch.nn.Module) -> int:
     :rtype: int
     """
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
+
+
+def board_to_tensor(
+        board: chess.Board
+    ) -> np.array:
+    """
+    Convert a chess.Board object into a numpy array of shape (18, 8, 8).
+    :param board: chess.Board object
+    :type board: chess.Board
+    :return: Numpy array
+    :rtype: np.array:
+    """
+    x = np.zeros((18, 8, 8), dtype=np.uint8)
+
+    piece_to_plane = {
+        'P': 0, 'N': 1, 'B': 2, 'R': 3, 'Q': 4, 'K': 5,
+        'p': 6, 'n': 7, 'b': 8, 'r': 9, 'q': 10, 'k': 11,
+    }
+
+    for square in chess.SQUARES:
+        piece = board.piece_at(square)
+        if piece:
+            plane = piece_to_plane[piece.symbol()]
+            rank = 7 - chess.square_rank(square)
+            file = chess.square_file(square)
+            x[plane, rank, file] = 1
+    
+    if board.turn == chess.WHITE:
+        x[12, :, :] = 1
+
+    if board.has_kingside_castling_rights(chess.WHITE):
+        x[13, :, :] = 1
+    
+    if board.has_queenside_castling_rights(chess.WHITE):
+        x[14, :, :] = 1
+    
+    if board.has_kingside_castling_rights(chess.BLACK):
+        x[15, :, :] = 1
+    
+    if board.has_queenside_castling_rights(chess.BLACK):
+        x[16, :, :] = 1
+    
+    if board.ep_square is not None:
+        rank = 7 - chess.square_rank(board.ep_square)
+        file = chess.square_file(board.ep_square)
+        x[17, rank, file] = 1
+    
+    return x
+    
 
 
 def fen_to_tensor(

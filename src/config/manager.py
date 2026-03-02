@@ -57,6 +57,7 @@ class EngineConfig:
     depth: int
     tt_size_mb: int
     time_limit: int
+    book_path: str
 
 
 class ConfigurationManager:
@@ -132,5 +133,6 @@ class ConfigurationManager:
             model_strategy=config['model_strategy'],
             depth=config['depth'],
             tt_size_mb=config['tt_size_mb'],
-            time_limit=config['time_limit']
+            time_limit=config['time_limit'],
+            book_path=config['book_path']
         )

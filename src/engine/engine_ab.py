@@ -4,6 +4,7 @@ import chess
 import chess.polyglot
 from src.engine.tt import TranspositionTable
 from src.engine.model_wrapper import ModelWrapper
+from src.engine.book import OpeningBook
 from src.config.manager import ConfigurationManager
 from src.models import ModelManager
 from src.logging import logger
@@ -26,7 +27,7 @@ class AlphaBetaEngine:
     
     def __init__(self, config: ConfigurationManager):
         self.config = config.get_engine_config()
-
+        self.book = OpeningBook(self.config.book_path)
         self.evaluator = ModelWrapper(ModelManager(config=config).load_model())
         self.tt = TranspositionTable(self.config.tt_size_mb)
         self.nodes_searched = 0
@@ -127,7 +128,7 @@ class AlphaBetaEngine:
         
         # Terminal nodes
         if board.is_checkmate():
-            return -1.0, None
+            return float("-inf"), None
         if board.is_stalemate() or board.is_insufficient_material():
             return 0.0, None
         if board.can_claim_draw():
@@ -227,6 +228,13 @@ class AlphaBetaEngine:
         logger.info(f"Searching position: {board.fen()}")
         
         start_time = time.time()
+
+        
+        book_move = self.book.get_move(board)
+        if book_move is not None:
+            logger.info(f"Book move found: {book_move.uci()}")
+            return book_move
+        
         best_move, score, depth_reached = self.iterative_deepening(
             board, max_depth=self.config.depth, time_limit=self.config.time_limit
         )
