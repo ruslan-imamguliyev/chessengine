@@ -240,23 +240,19 @@ class AlphaBetaEngine:
         if self.syzygy and self.syzygy.available(board):
             best_move = None
             best_dtz = float("inf")
-            best_wdl = float("inf")
+            
             for move in board.legal_moves:
                 board.push(move)
                 dtz = -self.syzygy.probe_dtz(board)
-                min_wdl = self.syzygy.probe_wdl(board)
+                wdl = self.syzygy.probe_wdl(board)
                 board.pop()
-                if min_wdl <= best_wdl:
-                    best_wdl = min_wdl
-                    print(best_wdl)
-                    print(min_wdl)
-                    if dtz < best_dtz:
-                        best_dtz = dtz
-                        best_move = move
+                if wdl < 0 and dtz < best_dtz:
+                    best_dtz = dtz
+                    best_move = move
                 
             
             if not best_move:
-                return next(board.legal_moves)
+                return next(iter(board.legal_moves))
             
             return best_move
 
