@@ -21,7 +21,7 @@ data_transformation:
 
 dataset_entity:
   input_path: dataset/transformed/
-  batch_size: 512
+  batch_size: 1024
   shuffle: True
   num_workers: 1
 
@@ -80,7 +80,8 @@ model_trainer:
 
 engine:
   model_strategy: latest
-  depth: 4
+  depth: 3
   tt_size_mb: 512
-  time_limit: 60
+  time_limit: 15
   book_path: performance.bin
+  syzygy_path: syzygy/

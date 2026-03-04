@@ -5,6 +5,7 @@ import chess.polyglot
 from src.engine.tt import TranspositionTable
 from src.engine.model_wrapper import ModelWrapper
 from src.engine.book import OpeningBook
+from src.engine.syzygy_handler import SyzygyHandler
 from src.config.manager import ConfigurationManager
 from src.models import ModelManager
 from src.logging import logger
@@ -30,6 +31,7 @@ class AlphaBetaEngine:
         self.book = OpeningBook(self.config.book_path)
         self.evaluator = ModelWrapper(ModelManager(config=config).load_model())
         self.tt = TranspositionTable(self.config.tt_size_mb)
+        self.syzygy = SyzygyHandler(self.config.syzygy_path)
         self.nodes_searched = 0
         self.tt_hits = 0
         self.stop_search = False
@@ -173,7 +175,7 @@ class AlphaBetaEngine:
         
         return best_score, best_move
     
-    def iterative_deepening(self, board: chess.Board, max_depth: int = 6,
+    def iterative_deepening(self, board: chess.Board, max_depth: int = 4,
                            time_limit: Optional[float] = None) -> Tuple[chess.Move, float, int]:
         """
         Iterative deepening search.
@@ -235,6 +237,33 @@ class AlphaBetaEngine:
             logger.info(f"Book move found: {book_move.uci()}")
             return book_move
         
+        if self.syzygy and self.syzygy.available(board):
+            best_move = None
+            best_dtz = float("inf")
+            best_wdl = float("inf")
+            for move in board.legal_moves:
+                board.push(move)
+                dtz = -self.syzygy.probe_dtz(board)
+                min_wdl = self.syzygy.probe_wdl(board)
+                board.pop()
+                if min_wdl <= best_wdl:
+                    best_wdl = min_wdl
+                    print(best_wdl)
+                    print(min_wdl)
+                    if dtz < best_dtz:
+                        best_dtz = dtz
+                        best_move = move
+                
+            
+            if not best_move:
+                return next(board.legal_moves)
+            
+            return best_move
+
+
+            
+            
+
         best_move, score, depth_reached = self.iterative_deepening(
             board, max_depth=self.config.depth, time_limit=self.config.time_limit
         )

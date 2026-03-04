@@ -6,6 +6,9 @@ __pycache__/
 # Model checkpoints
 checkpoints/
 
+# Syzygy tablebases
+syzygy/
+
 # Binary datasets
 *.bin
 

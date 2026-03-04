@@ -2,7 +2,7 @@ import torch
 import chess
 import numpy as np
 from typing import List
-from src.utils import fen_to_tensor
+from src.utils import board_to_tensor
 from src.constants import DEVICE
 
 
@@ -27,7 +27,7 @@ class ModelWrapper:
         
         Returns: Score from white's perspective in [-1, 1]
         """
-        bitplanes = fen_to_tensor(board.fen())
+        bitplanes = board_to_tensor(board)
         tensor = torch.from_numpy(bitplanes).float().unsqueeze(0).to(self.device)
         score = self.model(tensor).item()
         
@@ -48,7 +48,7 @@ class ModelWrapper:
             return []
         
         # Convert all boards to bitplanes
-        bitplanes_list = [fen_to_tensor(board.fen()) for board in boards]
+        bitplanes_list = [board_to_tensor(board) for board in boards]
         bitplanes_array = np.stack(bitplanes_list)
         
         # Batch inference

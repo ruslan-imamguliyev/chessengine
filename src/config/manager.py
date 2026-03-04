@@ -58,6 +58,7 @@ class EngineConfig:
     tt_size_mb: int
     time_limit: int
     book_path: str
+    syzygy_path: str
 
 
 class ConfigurationManager:
@@ -134,5 +135,6 @@ class ConfigurationManager:
             depth=config['depth'],
             tt_size_mb=config['tt_size_mb'],
             time_limit=config['time_limit'],
-            book_path=config['book_path']
+            book_path=config['book_path'],
+            syzygy_path=config['syzygy_path']
         )
