@@ -81,7 +81,7 @@ model_trainer:
 engine:
   model_strategy: latest
   depth: 3
-  tt_size_mb: 512
+  tt_size_mb: 128
   time_limit: 15
   book_path: performance.bin
   syzygy_path: syzygy/

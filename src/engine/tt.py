@@ -63,33 +63,3 @@ class TranspositionTable:
     def clear(self):
         """Clear the transposition table."""
         self.table.clear()
-
-class TranspositionsTableSimple:
-    def __init__(self, size_mb=256):
-        """Initialize transposition table with size limit."""
-        self.max_entries = (size_mb * 1024 * 1024) // 64
-        self.table = OrderedDict()
-    
-    def store(self, zobrist_hash, score: float, best_move: chess.Move):
-        if len(self.table) >= self.max_entries:
-            self.table.popitem(last=False)
-        
-        self.table[zobrist_hash] = {
-            'score': score,
-            'best_move': best_move
-        }
-    
-    def probe(self, zobrist_hash) -> tuple[float, chess.Move]:
-        """
-        Look up position in table.
-        """
-
-        if zobrist_hash not in self.table:
-            return None, None
-        
-        entry = self.table[zobrist_hash]
-        
-        return entry['score'], entry['best_move']
-    
-    def clear(self):
-        self.table.clear()

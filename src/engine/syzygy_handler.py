@@ -8,14 +8,14 @@ class SyzygyHandler:
     def probe_wdl(self, board: chess.Board):
         try:
             return self.tablebase.probe_wdl(board)
-        except chess.syzygy.MissingTableError:
+        except:
             return None
 
     def probe_dtz(self, board: chess.Board):
         try:
             return self.tablebase.probe_dtz(board)
-        except chess.syzygy.MissingTableError:
+        except:
             return None
     
     def available(self, board: chess.Board):
-        return board.occupied.bit_count()
+        return board.occupied.bit_count() <= 5
