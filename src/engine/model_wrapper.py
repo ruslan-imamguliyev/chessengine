@@ -61,3 +61,20 @@ class ModelWrapper:
                 scores[i] = -scores[i]
         
         return scores.tolist()
+    @torch.no_grad()
+    def evaluate_child_moves(self, board: chess.Board, moves: List[chess.Move]) -> List[float]:
+        """
+        Evaluate a list of legal moves from the same root board using batched inference.
+
+        Returns scores from the current side-to-move perspective *after* each move.
+        """
+        if not moves:
+            return []
+
+        child_boards = []
+        for move in moves:
+            child = board.copy(stack=False)
+            child.push(move)
+            child_boards.append(child)
+
+        return self.evaluate_batch(child_boards)

@@ -59,6 +59,8 @@ class EngineConfig:
     time_limit: int
     book_path: str
     syzygy_path: str
+    num_workers: int
+    root_parallel_min_depth: int
 
 
 class ConfigurationManager:
@@ -136,5 +138,7 @@ class ConfigurationManager:
             tt_size_mb=config['tt_size_mb'],
             time_limit=config['time_limit'],
             book_path=config['book_path'],
-            syzygy_path=config['syzygy_path']
+            syzygy_path=config['syzygy_path'],
+            num_workers=config.get('num_workers', 1),
+            root_parallel_min_depth=config.get('root_parallel_min_depth', 3)
         )

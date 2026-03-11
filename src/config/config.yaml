@@ -85,3 +85,5 @@ engine:
   time_limit: 15
   book_path: performance.bin
   syzygy_path: syzygy/
+  num_workers: 4
+  root_parallel_min_depth: 3
