@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from threading import RLock
 import chess
 
 
@@ -16,32 +17,35 @@ class TranspositionTable:
         """Initialize transposition table with size limit."""
         self.max_entries = (size_mb * 1024 * 1024) // 64  # Rough estimate
         self.table = OrderedDict()
+        self._lock = RLock()
     
     def store(self, zobrist_hash, depth, score, best_move, flag):
         """Store position evaluation."""
-        if len(self.table) >= self.max_entries:
-            # Remove oldest entry
-            self.table.popitem(last=False)
-        
-        self.table[zobrist_hash] = {
-            'depth': depth,
-            'score': score,
-            'best_move': best_move,
-            'flag': flag
-        }
+        with self._lock:
+            if len(self.table) >= self.max_entries:
+                # Remove oldest entry
+                self.table.popitem(last=False)
+
+            self.table[zobrist_hash] = {
+                'depth': depth,
+                'score': score,
+                'best_move': best_move,
+                'flag': flag
+            }
     
     def probe(self, zobrist_hash, depth, alpha, beta):
         """
         Look up position in table.
         Returns (score, best_move) if usable, else (None, None)
         """
-        if zobrist_hash not in self.table:
-            return None, None
-        
-        entry = self.table[zobrist_hash]
-        
-        # Move to end (LRU)
-        self.table.move_to_end(zobrist_hash)
+        with self._lock:
+            if zobrist_hash not in self.table:
+                return None, None
+
+            entry = self.table[zobrist_hash]
+
+            # Move to end (LRU)
+            self.table.move_to_end(zobrist_hash)
         
         # Only use if searched to sufficient depth
         if entry['depth'] < depth:
@@ -62,4 +66,5 @@ class TranspositionTable:
     
     def clear(self):
         """Clear the transposition table."""
-        self.table.clear()
+        with self._lock:
+            self.table.clear()
