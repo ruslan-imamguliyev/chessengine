@@ -59,6 +59,12 @@ class EngineConfig:
     time_limit: int
     book_path: str
     syzygy_path: str
+    num_workers: int
+    root_parallel_min_depth: int
+    num_simulations: int
+    leaf_parallelism: int
+    puct_c: float
+    prior_temperature: float
 
 
 class ConfigurationManager:
@@ -136,5 +142,11 @@ class ConfigurationManager:
             tt_size_mb=config['tt_size_mb'],
             time_limit=config['time_limit'],
             book_path=config['book_path'],
-            syzygy_path=config['syzygy_path']
+            syzygy_path=config['syzygy_path'],
+            num_workers=config.get('num_workers', 1),
+            root_parallel_min_depth=config.get('root_parallel_min_depth', 3),
+            num_simulations=config.get('num_simulations', 600),
+            leaf_parallelism=config.get('leaf_parallelism', 8),
+            puct_c=config.get('puct_c', 1.4),
+            prior_temperature=config.get('prior_temperature', 0.7)
         )
