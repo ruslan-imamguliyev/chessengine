@@ -11,7 +11,7 @@ include(FetchContent)
 FetchContent_Declare(
   chesslib
   GIT_REPOSITORY https://github.com/Disservin/chess-library.git
-  GIT_TAG v0.3.4
+  GIT_TAG master
 )
 FetchContent_MakeAvailable(chesslib)
 

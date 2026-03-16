@@ -91,3 +91,6 @@ engine:
   leaf_parallelism: 8
   puct_c: 1.4
   prior_temperature: 0.7
+
+model_compiler:
+  output_path: model.ts

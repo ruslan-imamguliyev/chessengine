@@ -12,6 +12,9 @@ syzygy/
 # Binary datasets
 *.bin
 
+# TorchScript models
+*.ts
+
 # PyTorch tensors
 *.pt
 *.pth

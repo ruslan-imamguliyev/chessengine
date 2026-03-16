@@ -67,6 +67,11 @@ class EngineConfig:
     prior_temperature: float
 
 
+@dataclass(frozen=True)
+class ModelCompilerEngine:
+    output_path: str
+
+
 class ConfigurationManager:
     def __init__(self,
                  config_path: str = PATH_TO_CONFIG_FILE
@@ -149,4 +154,11 @@ class ConfigurationManager:
             leaf_parallelism=config.get('leaf_parallelism', 8),
             puct_c=config.get('puct_c', 1.4),
             prior_temperature=config.get('prior_temperature', 0.7)
+        )
+
+    def get_model_compiler_config(self) -> ModelCompilerEngine:
+        config = self.config['model_compiler']
+
+        return ModelCompilerEngine(
+            output_path=config['output_path']
         )
