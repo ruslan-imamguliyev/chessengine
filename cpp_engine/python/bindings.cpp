@@ -10,8 +10,10 @@ PYBIND11_MODULE(chessengine_cpp, m) {
     m.doc() = "C++ alpha-beta and MCTS engines backed by TorchScript";
 
     py::class_<chessengine::TorchEvaluator>(m, "TorchEvaluator")
-        .def(py::init<const std::string&, torch::Device>(), py::arg("model_path"),
-             py::arg("device") = torch::kCPU);
+        .def(py::init([](const std::string& model_path, const std::string& device) {
+            torch::Device dev = (device == "cuda") ? torch::kCUDA : torch::kCPU;
+            return std::make_unique<chessengine::TorchEvaluator>(model_path, dev);
+        }), py::arg("model_path"), py::arg("device") = "cpu");
 
     py::class_<chessengine::ABConfig>(m, "ABConfig")
         .def(py::init<>())

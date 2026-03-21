@@ -3,28 +3,30 @@
 #include <algorithm>
 #include <chrono>
 #include <limits>
+#include <string>
 
 namespace chessengine {
 
 namespace {
-int piece_value(chess::PieceType type) {
-    switch (type) {
-        case chess::PieceType::PAWN:
-            return 100;
-        case chess::PieceType::KNIGHT:
+int piece_value_from_promo_char(char promo) {
+    switch (promo) {
+        case 'n':
+        case 'N':
             return 320;
-        case chess::PieceType::BISHOP:
+        case 'b':
+        case 'B':
             return 330;
-        case chess::PieceType::ROOK:
+        case 'r':
+        case 'R':
             return 500;
-        case chess::PieceType::QUEEN:
+        case 'q':
+        case 'Q':
             return 900;
-        case chess::PieceType::KING:
-            return 20000;
         default:
             return 0;
     }
 }
+
 }  // namespace
 
 AlphaBetaEngine::AlphaBetaEngine(ABConfig config, TorchEvaluator& evaluator)
@@ -43,12 +45,11 @@ std::vector<chess::Move> AlphaBetaEngine::order_moves(const chess::Board& board,
             score = 1'000'000;
         } else {
             if (board.isCapture(move)) {
-                auto victim = board.at(move.to());
-                auto attacker = board.at(move.from());
-                score += 10 * piece_value(victim.type()) - piece_value(attacker.type());
+                score += 5'000;
             }
-            if (move.typeOf() == chess::Move::PROMOTION) {
-                score += piece_value(move.promotionType());
+            const std::string uci = chess::uci::moveToUci(move);
+            if (uci.size() == 5) {
+                score += piece_value_from_promo_char(uci[4]);
             }
             chess::Board copy = board;
             copy.makeMove(move);
@@ -66,15 +67,17 @@ std::vector<chess::Move> AlphaBetaEngine::order_moves(const chess::Board& board,
 }
 
 bool AlphaBetaEngine::is_terminal(const chess::Board& board, float& score) {
-    if (board.isGameOver().second == chess::GameResultReason::CHECKMATE) {
-        score = -std::numeric_limits<float>::infinity();
+    chess::Movelist legal;
+    chess::movegen::legalmoves(legal, board);
+    if (!legal.empty()) return false;
+
+    if (board.inCheck()) {
+        score = -1.0f;
         return true;
     }
-    if (board.isGameOver().first != chess::GameResult::NONE) {
-        score = 0.0f;
-        return true;
-    }
-    return false;
+
+    score = 0.0f;
+    return true;
 }
 
 float AlphaBetaEngine::quiescence(chess::Board& board, float alpha, float beta, int depth) {
@@ -89,7 +92,13 @@ float AlphaBetaEngine::quiescence(chess::Board& board, float alpha, float beta, 
 
     chess::Movelist tactical;
     for (const auto& move : legal) {
-        if (board.isCapture(move) || board.givesCheck(move)) tactical.add(move);
+        bool is_tactical = board.isCapture(move);
+        if (!is_tactical) {
+            chess::Board copy = board;
+            copy.makeMove(move);
+            is_tactical = copy.inCheck();
+        }
+        if (is_tactical) tactical.add(move);
     }
 
     if (tactical.empty()) return stand_pat;

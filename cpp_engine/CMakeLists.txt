@@ -26,17 +26,18 @@ add_library(chessengine_core
 target_include_directories(chessengine_core
   PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${chesslib_SOURCE_DIR}/include
 )
 
 target_link_libraries(chessengine_core
   PUBLIC
-    chess::chess
     ${TORCH_LIBRARIES}
 )
 
 target_compile_options(chessengine_core PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/W4> $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic>)
 
 if(CHESSENGINE_BUILD_PYTHON)
+  set(PYBIND11_FINDPYTHON OFF)
   find_package(pybind11 CONFIG REQUIRED)
 
   pybind11_add_module(chessengine_cpp MODULE python/bindings.cpp)

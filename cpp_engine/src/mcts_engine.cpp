@@ -35,10 +35,12 @@ std::vector<float> MCTSEngine::softmax(const std::vector<float>& values, float t
 }
 
 std::optional<float> MCTSEngine::terminal_value(const chess::Board& board) {
-    const auto state = board.isGameOver();
-    if (state.second == chess::GameResultReason::CHECKMATE) return -1.0f;
-    if (state.first != chess::GameResult::NONE) return 0.0f;
-    return std::nullopt;
+    chess::Movelist legal;
+    chess::movegen::legalmoves(legal, board);
+    if (!legal.empty()) return std::nullopt;
+
+    if (board.inCheck()) return -1.0f;
+    return 0.0f;
 }
 
 MCTSNode* MCTSEngine::select_child(MCTSNode* node) const {

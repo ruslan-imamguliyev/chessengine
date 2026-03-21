@@ -54,6 +54,9 @@ class ModelTrainerConfig:
 @dataclass(frozen=True)
 class EngineConfig:
     model_strategy: str
+    use_cpp_backend: bool
+    type: str
+    compiled_model_path: str
     depth: int
     tt_size_mb: int
     time_limit: int
@@ -143,7 +146,10 @@ class ConfigurationManager:
 
         return EngineConfig(
             model_strategy=config['model_strategy'],
+            use_cpp_backend=config['use_cpp_backend'],
+            type=config['type'],
             depth=config['depth'],
+            compiled_model_path=config['compiled_model_path'],
             tt_size_mb=config['tt_size_mb'],
             time_limit=config['time_limit'],
             book_path=config['book_path'],

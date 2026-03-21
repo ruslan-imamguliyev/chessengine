@@ -5,7 +5,8 @@ import time
 
 import chess
 
-from src.config.manager import ConfigurationManager
+from src.config.manager import EngineConfig
+from src.engine.manager import Engine
 from src.engine.book import OpeningBook
 from src.engine.model_wrapper import ModelWrapper
 from src.engine.syzygy_handler import SyzygyHandler
@@ -32,20 +33,21 @@ class MCTSNode:
         return len(self.children) > 0
 
 
-class MCTSEngine:
+class MCTSEngine(Engine):
     """
     Parallel neural search engine using batched PUCT MCTS.
 
     Kept class name for backward compatibility with existing imports.
     """
 
-    def __init__(self, config: ConfigurationManager):
-        self.config = config.get_engine_config()
-        self.book = OpeningBook(self.config.book_path)
+    def __init__(self, config: EngineConfig):
+        super().__init__(config)
+        # self.config = config
+        # self.book = OpeningBook(self.config.book_path)
         self.evaluator = ModelWrapper(
             ModelManager(config=config).load_model(strategy=self.config.model_strategy)
         )
-        self.syzygy = SyzygyHandler(self.config.syzygy_path)
+        # self.syzygy = SyzygyHandler(self.config.syzygy_path)
 
         self.nodes_searched = 0
         self.tt_hits = 0
@@ -203,27 +205,27 @@ class MCTSEngine:
         return best_child.move
 
     def get_best_move(self, board: chess.Board) -> chess.Move:
-        logger.info(f"Searching position: {board.fen()}")
-        self.nodes_searched = 0
+        # logger.info(f"Searching position: {board.fen()}")
+        # self.nodes_searched = 0
 
-        book_move = self.book.get_move(board)
-        if book_move is not None:
-            logger.info(f"Book move found: {book_move.uci()}")
-            return book_move
+        # book_move = self.book.get_move(board)
+        # if book_move is not None:
+        #     logger.info(f"Book move found: {book_move.uci()}")
+        #     return book_move
 
-        if self.syzygy and self.syzygy.available(board):
-            best_move = None
-            best_dtz = float("inf")
-            for move in board.legal_moves:
-                board.push(move)
-                dtz = -self.syzygy.probe_dtz(board)
-                wdl = self.syzygy.probe_wdl(board)
-                board.pop()
-                if wdl < 0 and dtz < best_dtz:
-                    best_dtz = dtz
-                    best_move = move
-            if best_move:
-                return best_move
+        # if self.syzygy and self.syzygy.available(board):
+        #     best_move = None
+        #     best_dtz = float("inf")
+        #     for move in board.legal_moves:
+        #         board.push(move)
+        #         dtz = -self.syzygy.probe_dtz(board)
+        #         wdl = self.syzygy.probe_wdl(board)
+        #         board.pop()
+        #         if wdl < 0 and dtz < best_dtz:
+        #             best_dtz = dtz
+        #             best_move = move
+        #     if best_move:
+        #         return best_move
 
         start = time.time()
         best_move = self._run_mcts(board, time_limit=self.config.time_limit)
