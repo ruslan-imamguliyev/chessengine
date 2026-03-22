@@ -54,6 +54,9 @@ class ModelTrainerConfig:
 @dataclass(frozen=True)
 class EngineConfig:
     model_strategy: str
+    use_cpp_backend: bool
+    type: str
+    compiled_model_path: str
     depth: int
     tt_size_mb: int
     time_limit: int
@@ -65,6 +68,11 @@ class EngineConfig:
     leaf_parallelism: int
     puct_c: float
     prior_temperature: float
+
+
+@dataclass(frozen=True)
+class ModelCompilerEngine:
+    output_path: str
 
 
 class ConfigurationManager:
@@ -138,7 +146,10 @@ class ConfigurationManager:
 
         return EngineConfig(
             model_strategy=config['model_strategy'],
+            use_cpp_backend=config['use_cpp_backend'],
+            type=config['type'],
             depth=config['depth'],
+            compiled_model_path=config['compiled_model_path'],
             tt_size_mb=config['tt_size_mb'],
             time_limit=config['time_limit'],
             book_path=config['book_path'],
@@ -149,4 +160,11 @@ class ConfigurationManager:
             leaf_parallelism=config.get('leaf_parallelism', 8),
             puct_c=config.get('puct_c', 1.4),
             prior_temperature=config.get('prior_temperature', 0.7)
+        )
+
+    def get_model_compiler_config(self) -> ModelCompilerEngine:
+        config = self.config['model_compiler']
+
+        return ModelCompilerEngine(
+            output_path=config['output_path']
         )
