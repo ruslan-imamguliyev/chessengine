@@ -1,5 +1,6 @@
 from pathlib import Path
 import logging
+import sys
 
 class Logger(logging.Logger):
     def __init__(
@@ -24,6 +25,7 @@ class ConsoleHandler(logging.StreamHandler):
             "[%(asctime)s] [%(levelname)s] [%(module)s] - %(message)s",
             datefmt=r"%m/%d/%Y %H:%M:%S",
         )
+        self.setStream(sys.stderr)
         self.setFormatter(formatter)
         self.setLevel(level)
 
