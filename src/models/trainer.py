@@ -16,7 +16,7 @@ from src.logging import logger
 from src.utils import count_parameters, create_paths
 from src.config.manager import ConfigurationManager
 from src.constants import DEVICE
-from src.integrations import MLFlowIntegration
+from src.integrations.mlflow import MLFlowIntegration
 
 
 class EarlyStopping:
