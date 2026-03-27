@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Callable, Protocol, TextIO
 import sys
+import time
 
 import chess
 
@@ -13,7 +14,16 @@ if TYPE_CHECKING:
 @dataclass
 class UCIIdentity:
     name: str = "chessengine"
-    author: str = "ruslan_imamguliyev"
+    author: str = "chessengine"
+
+
+@dataclass(frozen=True)
+class UCIOption:
+    name: str
+    option_type: str
+    default: str
+    min_value: int | None = None
+    max_value: int | None = None
 
 
 class UCIProtocol:
@@ -35,15 +45,30 @@ class UCIProtocol:
 
         self._board = chess.Board()
         self._engine: UCIProtocol.EngineLike | None = None
-    
+        self._options = [
+            UCIOption(name="Hash", option_type="spin", default="128", min_value=1, max_value=65536),
+            UCIOption(name="Threads", option_type="spin", default="1", min_value=1, max_value=1024),
+        ]
+        self._option_values = {option.name: option.default for option in self._options}
+
     def run(self) -> None:
-        for raw_line in self._stdin:
+        while True:
+            raw_line = self._stdin.readline()
+            if raw_line == "":
+                # EOF: GUI process closed stdin or process is shutting down.
+                break
+
             line = raw_line.strip()
             if not line:
+                # Keep waiting for the next command from the GUI.
+                time.sleep(0.001)
                 continue
 
-            if self._handle_command(line):
-                break
+            try:
+                if self._handle_command(line):
+                    break
+            except Exception as exc:  # pragma: no cover - defensive behavior for GUI compatibility
+                self._send(f"info string error: {exc}")
 
     def _handle_command(self, line: str) -> bool:
         tokens = line.split()
@@ -52,6 +77,8 @@ class UCIProtocol:
         if command == "uci":
             self._send(f"id name {self._identity.name}")
             self._send(f"id author {self._identity.author}")
+            for option in self._options:
+                self._send(self._format_option(option))
             self._send("uciok")
             return False
 
@@ -76,7 +103,7 @@ class UCIProtocol:
             return False
 
         if command == "setoption":
-            # Options are accepted for compatibility. Runtime options are not implemented yet.
+            self._set_option(tokens[1:])
             return False
 
         if command == "quit":
@@ -96,6 +123,51 @@ class UCIProtocol:
         engine = self._get_engine()
         best_move = engine.play(self._board.copy(stack=True))
         self._send(f"bestmove {best_move.uci()}")
+
+    def _set_option(self, args: list[str]) -> None:
+        if not args:
+            return
+
+        if args[0] != "name":
+            return
+
+        name_tokens: list[str] = []
+        value_tokens: list[str] = []
+        parsing_value = False
+
+        for token in args[1:]:
+            if token == "value" and not parsing_value:
+                parsing_value = True
+                continue
+
+            if parsing_value:
+                value_tokens.append(token)
+            else:
+                name_tokens.append(token)
+
+        option_name = " ".join(name_tokens)
+        if not option_name or option_name not in self._option_values:
+            return
+
+        option = self._get_option_by_name(option_name)
+        if option is None:
+            return
+
+        value = " ".join(value_tokens) if value_tokens else option.default
+        if option.option_type == "spin":
+            try:
+                spin_value = int(value)
+            except ValueError:
+                return
+
+            if option.min_value is not None and spin_value < option.min_value:
+                spin_value = option.min_value
+            if option.max_value is not None and spin_value > option.max_value:
+                spin_value = option.max_value
+
+            value = str(spin_value)
+
+        self._option_values[option_name] = value
 
     def _parse_go_limits(self, args: list[str]) -> dict[str, int | None]:
         limits: dict[str, int | None] = {
@@ -159,6 +231,22 @@ class UCIProtocol:
             self._engine = self._engine_factory()
 
         return self._engine
+
+    def _get_option_by_name(self, name: str) -> UCIOption | None:
+        for option in self._options:
+            if option.name == name:
+                return option
+
+        return None
+
+    @staticmethod
+    def _format_option(option: UCIOption) -> str:
+        message = f"option name {option.name} type {option.option_type} default {option.default}"
+        if option.min_value is not None:
+            message += f" min {option.min_value}"
+        if option.max_value is not None:
+            message += f" max {option.max_value}"
+        return message
 
     @staticmethod
     def _default_engine_factory() -> "Engine":
